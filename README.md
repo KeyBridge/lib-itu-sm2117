@@ -75,7 +75,8 @@ assert np.array_equal(recordings[0], np.array(iq))
 write_iq_dataset("my_iq_data.h5", iq2, sampling_frequency, group=("GroupAtRoot", "Subgroup", "Subsubgroup"))
 metadata, recordings, channels = read_iq_dataset("my_id_data.h5", "Dataset_0", group=("GroupAtRoot", "Subgroup", "Subsubgroup"))
 assert np.array_equal(recordings[0], iq2)
-```'
+```
+
 > Note about dtypes: all data is stored and read as float32 or complex64. If your input
 > uses a higher or lower number of bytes, it will be converted internally accordingly. I.e.,
 > all float types will be converted to float32 (if needed) and all complex types will be 
@@ -283,7 +284,7 @@ Currently this library does not support the the following specs of the Recommend
 
 ## License
 
-[MIT] (LICENSE)
+[MIT] (./LICENSE)
 
 ## Contact
 
