@@ -1,92 +1,294 @@
-# lib-sm2117
+# ITU-R SM.2117-0 Python Library
 
-Library to read and write files conforming to the SM.2117 recommendation from ITU.
+This is a HDF5 read/write Python library for Recommendation 
+[ITU-R SM.2117-0](https://www.itu.int/rec/R-REC-SM.2117-0-201809-I): "Data format 
+definition for exchanging stored I/Q data for the purpose of spectrum monitoring".
 
-## Getting started
+This is a non-official library supported by [Key Bridge Global](https://keybridgewireless.com/) as a
+contribution to IEEE 1900.8 Working Group.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Quick Start
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin http://git.mcl.keybridge.ch/ml/lib-sm2117.git
-git branch -M main
-git push -uf origin main
+```bash
+pip install itusm2117
 ```
 
-## Integrate with your tools
+```python
+>>> from itusm2117 import write_iq_dataset, read_iq_dataset
+>>> import numpy as np
+>>> iq = [1+1j, 2+2j, 3+3j, 4+4j]
+>>> sampling_frequency = 125e5
+>>> write_iq_dataset("my_iq_data.h5", iq, sampling_frequency)
+>>> metadata, recordings, channels = read_iq_dataset("my_id_data.h5", "Dataset_0")
+>>> assert np.array_equal(recordings[0], np.array(iq))
+True
+>>> assert channels[0] == "Channel_0"
+True
+>>> assert metadata["Sampling frequency (Hz)"] == 125e6
+True
+```
 
-- [ ] [Set up project integrations](http://git.mcl.keybridge.ch/ml/lib-sm2117/-/settings/integrations)
+## Contents
 
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!).  Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+  - [Quick Start](#quick-start)  
+  - [Installation](#installation)
+  - [How To's](#how-tos)
+    - [Storing I/Q data into H5 groups <a name="groups"></a>](#storing-iq-data-into-h5-groups-)
+    - [Naming I/Q datasets](#naming-iq-datasets)
+    - [Naming channels <a name="channels"></a>](#naming-channels-)
+    - [Supported data types and shapes](#supported-data-types-and-shapes)
+    - [Adding metadata <a name="metadata"></a>](#adding-metadata-)
+  - [Limitations](#limitations)
+  - [License](#license)
+  - [Support] (#support)
+  - [Contributing](#contributing)
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```bash
+pip install itusm2117
+```
+Direct dependencies:
+- **numpy**, for array manipulation.
+- **h5py**, for reading and writing HDF5 files.
+- **cerberus**, for metadada validation & normalization.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## How To's
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### Storing I/Q data into H5 groups <a name="groups"></a>
+By default, the recordings will be placed in the root of the H5 file. You can 
+change this behaviour using the ``group`` argument of ``write_iq_dataset``. This
+argument can be a simple string or a list of strings that will be treaded as hierarchy
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+```python
+from itusm2117 import write_iq_dataset, read_iq_dataset
+import numpy as np
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+iq = [1+1j, 2+2j, 3+3j, 4+4j]
+iq2 = np.array(iq) * 2
+sampling_frequency = 125e5
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+# filename must end with '.h5' else it is appended internally
+write_iq_dataset("my_iq_data.h5", iq, sampling_frequency, group="GroupAtRoot")
+metadata, recordings, channels = read_iq_dataset("my_id_data.h5", "Dataset_0", group="GroupAtRoot")
+assert np.array_equal(recordings[0], np.array(iq))
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+write_iq_dataset("my_iq_data.h5", iq2, sampling_frequency, group=("GroupAtRoot", "Subgroup", "Subsubgroup"))
+metadata, recordings, channels = read_iq_dataset("my_id_data.h5", "Dataset_0", group=("GroupAtRoot", "Subgroup", "Subsubgroup"))
+assert np.array_equal(recordings[0], iq2)
+```'
+> Note about dtypes: all data is stored and read as float32 or complex64. If your input
+> uses a higher or lower number of bytes, it will be converted internally accordingly. I.e.,
+> all float types will be converted to float32 (if needed) and all complex types will be 
+> converted to complex64 (if needed).
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### Naming I/Q datasets
+For each call of ``write_iq_dataset`` a H5 dataset is created. If the name for the 
+dataset is not specified through the ``dataset_name`` argument one will generated
+with the preffix 'Dataset_' plus the next available integer in that H5 group (e.g., 
+'Dataset_0').
+```python
+from itusm2117 import write_iq_dataset, read_iq_dataset
+import numpy as np
+
+iq_with_name = [1+1j, 2+2j, 3+3j, 4+4j]
+iq_without_name = np.array(iq_with_name) * 2
+sampling_frequency = 125e5
+fn = "test_dataset_name.h5"
+
+write_iq_dataset(fn, iq_with_name, sampling_frequency, group="GroupAtRoot", dataset_name="MyDataset")
+metadata, recordings, channels = read_iq_dataset(fn, "MyDataset", group="GroupAtRoot")
+assert np.array_equal(recordings[0], np.array(iq_with_name))
+
+write_iq_dataset(fn, iq_without_name, sampling_frequency, group="GroupAtRoot")
+metadata, recordings, channels = read_iq_dataset(fn, "Dataset_0", group="GroupAtRoot")
+assert np.array_equal(recordings[0], iq_without_name)
+```
+
+### Naming channels <a name="channels"></a>
+If not specified the channels will be named 'Channel_0', 'Channel_1' and so on. 
+You can alter this behaviour by specifing ``channel_suffixes``. Note that starting
+the channel name with "Channel_" is mandatory per ITU-R SM.2117-0.
+```python
+from itusm2117 import write_iq_dataset, read_iq_dataset
+import numpy as np
+
+iq = np.array([
+[1+1j, 2+2j, 3+3j, 4+4j], 
+[1+1j, 2+2j, 3+3j, 4+4j]])
+sampling_frequency = 125e5
+
+write_iq_dataset("my_iq_data.h5", iq, sampling_frequency, channel_suffixes = ("A", "B"))
+metadata, recordings, channels = read_iq_dataset("my_iq_data.h5", "Dataset_0")
+
+assert channels[0] == "Channel_A"
+assert channels[1] == "Channel_B"
+```
+
+### Supported data types and shapes
+
+This library supports 6 different input shapes. The one used is infered at runtime.
+
+```python
+from itusm2117 import write_iq_dataset, read_iq_dataset
+import numpy as np
+filename = fn = "test.h5"
+sr = sampling_rate = 125e6
+name = dataset_name = "MyDataset"
+
+# supports several input formats
+complex_single_channel   = np.array([1+1j, 2+2j, 3+3j, 4+4j], dtype="complex64")
+timefirst_single_channel = np.array([[1, 2, 3, 4], [1, 2, 3, 4]], dtype="float32")
+iqpairs_single_channel   = np.array([[1,1], [2,2], [3,3], [4,4]], dtype="float32")
+complex_multichannel     = np.array([[1+1j, 2+2j, 3+3j, 4+4j],  # Channel_0
+                                    [1+1j, 2+2j, 3+3j, 4+4j]], # Channel_1
+                                    dtype="complex64")
+timefirst_multichannel   = np.array([[[1, 2, 3, 4], [1, 2, 3, 4 ]],  # Channel_0
+                                    [[1, 2, 3, 4], [1, 2, 3, 4 ]]], # Channel_1
+                                    dtype="float32")
+iqpairs_multichannel     = np.array([[[1, 1],[2, 2],[3, 3],[4, 4]],  # Channel_0
+                                    [[1, 1],[2, 2],[3, 3],[4, 4]]], # Channel_1
+                                    dtype="float32")
+
+# n = number of samples per recording
+# single channel, complex data, shape = (n,)
+write_iq_dataset(fn, complex_single_channel, sr, dataset_name = name, mode = "w")
+meta, arr, channels = read_iq_dataset(fn, name)
+assert np.array_equal(arr[0], complex_single_channel)
+
+# single channel, one array of Is, one array Qs, shape = (2, n)
+write_iq_dataset(fn, timefirst_single_channel, sr, dataset_name = name, mode = "w")
+meta, arr, channels = read_iq_dataset(fn, name)
+# the return type of arr is always complex and multi channel 
+assert np.array_equal(arr[0], complex_single_channel)
+
+# single channel, I/Q pairs, shape = (n, 2)
+write_iq_dataset(fn, iqpairs_single_channel, sr, dataset_name = name, mode = "w")
+meta, arr, channels = read_iq_dataset(fn, name)    
+assert np.array_equal(arr[0], complex_single_channel)
+
+# multi channel, complex data, shape = (nchannels, n)
+write_iq_dataset(fn, complex_multichannel, sr, dataset_name = name, mode = "w")
+meta, arr, channels = read_iq_dataset(fn, name)
+assert np.array_equal(arr, complex_multichannel)
+
+# multi channel, one array of Is, one array Qs, shape = (nchannels, 2, n)
+write_iq_dataset(fn, timefirst_multichannel, sr, dataset_name = name, mode = "w")
+meta, arr, channels = read_iq_dataset(fn, name)    
+assert np.array_equal(arr, complex_multichannel)
+
+# single channel, I/Q pairs, shape = (nchannels, n, 2)
+write_iq_dataset(fn, iqpairs_multichannel, sr, dataset_name = name, mode = "w")
+meta, arr, channels = read_iq_dataset(fn, name)    
+assert np.array_equal(arr, complex_multichannel)
+```
+
+### Adding metadata <a name="metadata"></a>
+
+There are severel predefined attributes (key-value pairs) supported by the Recommendation, 
+listed bellow. They can be passed to the ``write_iq_dataset`` method via the 
+``metadata`` dictionary or as direct named method arguments. In the later case,
+it is necessary to use the shorhand notation bellow. When using the dictionary, it's possible
+to use either the shorthand and/or the full name. Attributes not listed bellow are considered
+user defined attributes and are prefixed with 'User ' as specified in the Recommendation.
+
+> Note: The metadata is validated according to the Recommendation and ValueError
+> exceptions will be raise if any value provided is not in accordance. Please 
+> refer to the official [doc](https://www.itu.int/rec/R-REC-SM.2117-0-201809-I) for 
+> acceptable data types and values.
+
+| Shorthand                 | Full name                           |
+| :---:                     |:---:                                |
+| (readonly)                | ITU_R data set class                |
+| (readonly)                | ITU_R Recommendation                |
+| carrier_frequency         | RF carrier frequency (Hz)           |
+| sampling_frequency        | Sampling frequency (Hz)             |
+| (readonly)                | Data set type interpretation        |
+| unit                      | Data set unit                       |
+| scaling                   | Data set scaling factor             |
+| comment                   | Comment                             |
+| device                    | Device                              |
+| bandwidth                 | Filter bandwidth (Hz)               |
+| timestamp                 | Timestamp coarse (s)                |
+| timestamp_fine            | Timestamp fine (ns)                 |
+| latitude                  | Geolocation latitude (degree)       |
+| longitude                 | Geolocation longitude (degree)      |
+| altitude                  | Geolocation altitude (m)            |
+| separation                | Geolocation separation (m)          |
+| speed                     | Speed over ground magnitude (m/s)   |
+| speed_azimuth             | Speed over ground azimuth (degree)  |
+| orientation_azimuth       | Orientation azimuth (degree)        |
+| orientation_elevation     | Orientation elevation (degree)      |
+| orientation_skew          | Orientation skew (degree)           |
+| magnetic_declination      | Magnetic declination (degree)       |
+| unsynced_flag             | Unsynced timestamp flag             |
+| invalid_flag              | Invalid flag                        |
+| pllunlocked_flag          | PLL unlocked                        |
+| agc_flag                  | AGC flag                            |
+| detected_flag             | Detected signal flag                |
+| spectral_inversion_flag   | Spectral inversion flag             |
+| overrange_flag            | Over range flag                     |
+| lostsample_flag           | Lost sample flag                    |
+| attenuator                | Attenuator (dB)                     |
+| antenna_factor            | Antenna factor (1/m)                |
+| reference                 | Reference point                     |
+| receiver_impedance        | Receiver input impedance (Ohm)      |
+
+When reading files using ``read_iq_dataset`` the returned metadata is always in
+the full name notation
+
+```python
+from itusm2117 import write_iq_dataset, read_iq_dataset
+import numpy as np
+filename = "test2.h5"
+recordings = np.array([[1+1j, 2+2j, 3+3j, 4+4j], [1+1j, 2+2j, 3+3j, 4+4j]])
+
+# the metadata dictionary can use both shorthand and full name notations
+# note that the sampling_frequency can be specified there too.
+dict_metadata = {
+    "sampling_frequency": 125e6, # shorthand key 
+    "carrier_frequency": 3.6e9, # shorthand key
+    "Speed over ground magnitude (m/s)": 701.4  # full name key
+}
+bandwidth = 100e6
+attenuator = -30
+
+# mode = "w" ensures the file is rewritten if it exists
+write_iq_dataset(filename, recordings, mode="w",
+    attenuator = attenuator, # arg metadata (shorthand key)
+    bandwidth = bandwidth, # arg metadata (shorthand key)
+    metadata = dict_metadata )
+
+read_metadata, arr, channels = read_iq_dataset(filename, "Dataset_0")
+
+assert len(channels) == 2
+assert channels[0] == "Channel_0"
+assert channels[1] == "Channel_1"
+
+assert np.array_equal(arr, np.array(recordings, dtype="complex64"))
+
+assert read_metadata["Speed over ground magnitude (m/s)"] == dict_metadata["Speed over ground magnitude (m/s)"]
+assert read_metadata["Sampling frequency (Hz)"] == dict_metadata["sampling_frequency"]
+assert read_metadata["RF carrier frequency (Hz)"] == dict_metadata["carrier_frequency"]
+assert read_metadata["Filter bandwidth (Hz)"] == bandwidth
+assert read_metadata["Attenuator (dB)"] == attenuator
+```
+
+
+## Limitations
+
+Currently this library does not support the the following specs of the Recommendation:
+- Multisector datasets, which is used for IQ recordings with metadata changing over time
+- Bitfield datasets. This is used for marking each sample of a recording with specific flags.
+- Integet datasets. Currently all datasets are stored as float32.
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+[MIT] (LICENSE)
+
+## Contact
+
+For features requests or support please contact of the following emails.
+- andre.santos@keybridgeglobal.com
+- cyril.masia@keybridgeglobal.com
+
+## Contributing
