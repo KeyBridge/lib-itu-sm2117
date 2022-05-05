@@ -284,7 +284,7 @@ Currently this library does not support the the following specs of the Recommend
 
 ## License
 
-[MIT] (./LICENSE)
+[MIT](./LICENSE)
 
 ## Contact
 
