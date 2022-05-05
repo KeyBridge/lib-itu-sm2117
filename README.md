@@ -40,7 +40,7 @@ True
     - [Adding metadata <a name="metadata"></a>](#adding-metadata-)
   - [Limitations](#limitations)
   - [License](#license)
-  - [Contact] (#contact)
+  - [Contact](#contact)
   - [Contributing](#contributing)
 
 ## Installation
