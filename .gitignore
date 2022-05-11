@@ -3,11 +3,40 @@
 # Learn more about .gitignore:
 #     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
+
+######################################
+# User ###############################
+######################################
+
+# windows & IDE
 **/desktop.ini
 .vscode/
 .vscode/**
+
+# virtual enviroments
+**.venv
 .venv**
+
+# nvidia proviles
+**.nvvp 
+
+# pip installation links
 **.egg-info
+
+# logs
+nohup.out
+**.log
+
+# package specific
+
+
+# python binaries
+**/.pytest_cache
+**/__pycache__
+
+######################################
+######################################
+######################################
 
 
 # Node artifact files
