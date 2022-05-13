@@ -190,6 +190,8 @@ def write_iq_dataset(filename, recordings, sampling_frequency=None, metadata = {
         dataset.attrs.create(k, v)
     h5.close()
 
+    return normalized_metadata
+
 
 def _store_recordings(group, dataset_name, recordings, format, suffixes):
     basic_channel_dtype = [('Real', 'float32'), ('Imag', 'float32')]
