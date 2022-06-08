@@ -1,19 +1,62 @@
 # ITU-R SM.2117-0 Python Library
 
-This is a HDF5 read/write Python library for the data format in [Recommendation 
-ITU-R SM.2117-0](https://www.itu.int/rec/R-REC-SM.2117-0-201809-I) Data format 
-definition for exchanging stored I/Q data for the purpose of spectrum monitoring. It is supported by [Key Bridge Wireless](https://keybridgewireless.com/) as a
-contribution to IEEE 1900.8 Working Group.
+## Table of contents
+
+  - [Introduction](#introduction)
+  - [Quick Start](#quick-start)  
+    - [Installation](#installation)
+    - [Dependencies](#installation)
+    - [Writing Data](#installation)
+    - [Reading Data](#installation)
+  - [Limitations](#limitations)
+  - [How To](#how-tos)
+    - [Store I/Q data into H5 groups <a name="groups"></a>](docs/howtos.md#storing-iq-data-into-h5-groups)
+    - [Name I/Q datasets](docs/howtos.md#naming-iq-datasets)
+    - [Name channels <a name="channels"></a>](docs/howtos.md#naming-channels)
+    - [Supported data types and shapes](docs/howtos.md#supported-data-types-and-shapes)
+    - [Add metadata <a name="metadata"></a>](docs/howtos.md#adding-metadata)
+  - [License](#license)
+  - [Contact](#contact)
+  
 ___
 
 
-## Quick start
-Installation
+# Introduction
+
+This is an HDF5 read-write Python library for the data format in [Recommendation 
+ITU-R SM.2117-0](https://www.itu.int/rec/R-REC-SM.2117-0-201809-I). ITU-R SM.2117-0 is a data format definition for exchanging stored I/Q data with the intention of spectrum monitoring. Key Bridge Wireless supports the ITU in creating a library for the data format as a contribution to IEEE 1900.8 Working Group. 
+___
+
+### The Format
+
+The HDF5 is a generic and flexible file format for storing data and metadata. The ITU-R SM.211-0 describes a way to store IQ data using the HDF5 format. Below is an overview of the format.
+
+![itu hdf5](docs/ituhdf5.png)
+
+Check the content of a given HDF5 file using a desktop application called [Argos](https://github.com/titusjan/argos). Below is an example of a file opened with Argos that follows the specs in the ITU-R SM.211-0.
+
+![argos](docs/argos.png)
+___
+
+## Quick Start
+
+
+### Installation
+
+To get started, make sure to install Python version 2.8.2 on your machine. Use the following scrips: 
 ```bash
 pip install itusm2117
 ```
 
-Writing data
+### Dependencies
+
+Direct dependiencies are the following. 
+- **numpy** is used for array manipulation.
+- **h5py** is for reading and writing HDF5 files.
+- **cerberus** is for metadata validation and normalization.
+
+### Writing Data
+
 ```python
 import numpy as np
 from itusm2117 import write_iq_dataset
@@ -33,7 +76,7 @@ sampling_frequency = 125e6
 write_iq_dataset("my_iq_data.h5", iq, sampling_frequency)
 ```
 
-Reading data
+### Reading Data
 ```python
 from itusm2117 import read_iq_dataset
 
@@ -44,53 +87,24 @@ metadata, recordings, channels = read_iq_dataset("my_iq_data.h5", "Dataset_0")
 # recordings: np.array of complex64 with the IQ data. First dimension is the channel.
 # channels: List with the channels names (can be only one).
 ```
-___
-## Table of contents
-
-  - [Quick start](#quick-start)  
-  - [About the format](#about-the-format)  
-  - [Installation](#installation)
-  - [Limitations](#limitations)
-  - [License](#license)
-  - [Contact](#contact)
-  - [Contributing](#contributing)
-  - [How to](#how-tos)
-    - [Store I/Q data into H5 groups <a name="groups"></a>](docs/howtos.md#storing-iq-data-into-h5-groups)
-    - [Name I/Q datasets](docs/howtos.md#naming-iq-datasets)
-    - [Name channels <a name="channels"></a>](docs/howtos.md#naming-channels)
-    - [Supported data types and shapes](docs/howtos.md#supported-data-types-and-shapes)
-    - [Add metadata <a name="metadata"></a>](docs/howtos.md#adding-metadata)
-___
-
-## About the format
-
-The HDF5 is a generic and flexibe file format for storing data and metadata. The ITU-R SM.211-0 Recommendation describes a way to store IQ data using the HDF5 format. Bellow is a overview of format and the Recommedation.
-
-![itu hdf5](docs/ituhdf5.png)
-
-
-You can check the contents of a given HDF5 file using a desktop application called [Argos](https://github.com/titusjan/argos). Bellow is an examples of a file opened with Argos that follows the specs in the Recommendation.
-
-![argos](docs/argos.png)
-___
-
-
-## Installation
-```bash
-pip install itusm2117
-```
-Direct dependencies:
-- **numpy**, for array manipulation.
-- **h5py**, for reading and writing HDF5 files.
-- **cerberus**, for metadada validation & normalization.
-___
 
 ## Limitations
 
-Currently this library does not support the the following specs of the Recommendation:
-- Multisector datasets, which is used for IQ recordings with metadata changing over time
-- Bitfield datasets. This is used for marking each sample of a recording with specific flags.
-- Integet datasets. Currently all datasets are stored as float32.
+Currently, this library does not support the following specs on the **ITU-R SM.2117-0**:
+- **Multisector datasets** are used for IQ recordings with metadata changing over time
+- **Bitfield datasets** are used for marking each sample of a recording with specific flags.
+- **Integet datasets.** All datasets are stored as float32.
+___
+
+## How To's
+
+Check the following information for the different datasets and channel. 
+- [Store I/Q data into H5 groups <a name="groups"></a>](docs/howtos.md#storing-iq-data-into-h5-groups)
+- [Name I/Q datasets](docs/howtos.md#naming-iq-datasets)
+- [Name channels <a name="channels"></a>](docs/howtos.md#naming-channels)
+- [Supported data types and shapes](docs/howtos.md#supported-data-types-and-shapes)
+- [Add metadata <a name="metadata"></a>](docs/howtos.md#adding-metadata)
+
 ___
 
 ## License
@@ -98,4 +112,4 @@ ___
 ___
 
 ## Contact
-Contact us through GitHub for any comments, questions or pull requests.
+Contact us through our GitHub account for comments, questions, or pull requests.
