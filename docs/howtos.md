@@ -1,10 +1,8 @@
-## How To's
+# How To's
 
-### Storing I/Q data into H5 groups <a name="groups"></a>
-By default, the IQ data will be placed in the root of the H5 file. You can 
-change this behaviour using the ``group`` argument of ``write_iq_dataset``. This
-argument can be a simple string or a list of strings that will be treaded as hierarchy
-of groups.
+## Storing I/Q data into H5 groups <a name="groups"></a>
+
+By default, the IQ data will be placed in the root of the H5 file. You can change this behavior using the ``group`` argument of ``write_iq_dataset``. This argument can be a simple string or a list of strings that will be threaded as the hierarchy of groups.
 
 ```python
 from itusm2117 import write_iq_dataset, read_iq_dataset
@@ -24,16 +22,17 @@ metadata, recordings, channels = read_iq_dataset("my_id_data.h5", "Dataset_0", g
 assert np.array_equal(recordings[0], iq2)
 ```
 
-> Note about dtypes: all data is stored and read as float32 or complex64. If your input
-> uses a higher or lower number of bytes, it will be converted internally accordingly. I.e.,
-> all float types will be converted to float32 (if needed) and all complex types will be 
-> converted to complex64 (if needed).
+
+> Note on dtypes: All data is stored and read as float32 or complex64. <br /> 
+> If the input uses a higher or lower number of bytes, it will be converted internally accordingly. <br />
+> For example, all float types will be converted to float32 (if needed) and all complex types will be converted to complex64 (if needed).
+
 ___
-### Naming I/Q datasets
-For each call of ``write_iq_dataset`` a H5 dataset is created. If the name for the 
-dataset is not specified through the ``dataset_name`` argument one will generated
-with the preffix 'Dataset_' plus the next available integer in that H5 group (e.g., 
-'Dataset_0').
+
+## Naming I/Q datasets
+
+For each call of the ``write_iq_dataset``an H5 dataset is created. If the name for the dataset is not specified through the ``dataset_name`` argument one will be generated with the prefix **'Dataset_'** plus the next available integer in that H5 group (e.g., 'Dataset_0').
+
 ```python
 from itusm2117 import write_iq_dataset, read_iq_dataset
 import numpy as np
@@ -52,10 +51,13 @@ metadata, recordings, channels = read_iq_dataset(fn, "Dataset_0", group="GroupAt
 assert np.array_equal(recordings[0], iq_without_name)
 ```
 ___
-### Naming channels <a name="channels"></a>
-If not specified the channels will be named 'Channel_0', 'Channel_1' and so on. 
-You can alter this behaviour by specifing ``channel_suffixes``. Note that starting
-the channel name with "Channel_" is mandatory per ITU-R SM.2117-0.
+
+## Naming channels <a name="channels"></a>
+
+Unspecified channels will be named 'Channel_0', 'Channel_1', and so on.
+You can alter this behavior by specifying ``channel_suffixes``. 
+Note that starting the channel name with "Channel_" is mandatory per ITU-R SM.2117-0.
+
 ```python
 from itusm2117 import write_iq_dataset, read_iq_dataset
 import numpy as np
@@ -72,9 +74,10 @@ assert channels[0] == "Channel_A"
 assert channels[1] == "Channel_B"
 ```
 ___
-### Supported data types and shapes
 
-This library supports 6 different input shapes. The one used is infered at runtime.
+## Supported data types and shapes
+
+This library supports 6 different input shapes. The one used is inferred at runtime.
 
 ```python
 from itusm2117 import write_iq_dataset, read_iq_dataset
@@ -130,19 +133,13 @@ meta, arr, channels = read_iq_dataset(fn, name)
 assert np.array_equal(arr, complex_multichannel)
 ```
 ___
-### Adding metadata <a name="metadata"></a>
 
-There are severel predefined attributes (key-value pairs) supported by the Recommendation, 
-listed bellow. They can be passed to the ``write_iq_dataset`` method via the 
-``metadata`` dictionary or as direct named method arguments. In the later case,
-it is necessary to use the shorhand notation bellow. When using the dictionary, it's possible
-to use either the shorthand and/or the full name. Attributes not listed bellow are considered
-user defined attributes and are prefixed with 'User ' as specified in the Recommendation.
+## Adding metadata <a name="metadata"></a>
 
-> Note: The metadata is validated according to the Recommendation and ValueError
-> exceptions will be raise if any value provided is not in accordance. Please 
-> refer to the official [doc](https://www.itu.int/rec/R-REC-SM.2117-0-201809-I) for 
-> acceptable data types and values.
+There are several predefined attributes (key-value pairs) supported by the ITU-R SM.2117-0, listed below. They can be passed to the ``write_iq_dataset`` method via the ``metadata`` dictionary or as a directly named method argument. In the latter case, it is necessary to use the shorthand notation below. When using the dictionary, it is possible to use either the shorthand and/or the full name. Attributes not listed below are considered user defined attributes and are prefixed with 'User ' as specified in the  ITU-R SM.2117-0.
+
+> Note: The metadata is validated according to the ITU-R SM.2117-0 and ValueError exceptions will be raised if any value provided is not in accordance. Please refer to the official [document](https://www.itu.int/rec/R-REC-SM.2117-0-201809-I) for acceptable data types and values.
+
 
 | Shorthand                 | Full name                           |
 | :---:                     |:---:                                |
@@ -181,8 +178,7 @@ user defined attributes and are prefixed with 'User ' as specified in the Recomm
 | reference                 | Reference point                     |
 | receiver_impedance        | Receiver input impedance (Ohm)      |
 
-When reading files using ``read_iq_dataset`` the returned metadata is always in
-the full name notation
+When reading files using ``read_iq_dataset`` the returned metadata is always in the full name notation.
 
 ```python
 from itusm2117 import write_iq_dataset, read_iq_dataset
